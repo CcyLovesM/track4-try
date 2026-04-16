@@ -4,9 +4,26 @@ import streamlit as st
 
 
 st.set_page_config(
-    page_title="Fast-Food Investor Dashboard",
+    page_title="Beginner Investor Dashboard",
     layout="wide",
 )
+
+
+COMPANY_COLORS = {
+    "McDonald's": "#c1121f",
+    "Yum Brands": "#1d3557",
+    "Restaurant Brands International": "#2a9d8f",
+}
+
+METRIC_LABELS = {
+    "ROA": "ROA",
+    "ROE": "ROE",
+    "Profit Margin": "Profit Margin",
+    "Revenue Growth": "Revenue Growth",
+    "Leverage": "Leverage",
+}
+
+PERCENT_METRICS = {"ROA", "ROE", "Profit Margin", "Revenue Growth"}
 
 
 def load_data() -> pd.DataFrame:
@@ -39,316 +56,484 @@ def load_data() -> pd.DataFrame:
     return df
 
 
-df = load_data()
-
-metric_meta = {
-    "ROA": {
-        "label": "ROA",
-        "good": "higher",
-        "as_pct": True,
-        "explanation": """
-**Return on Assets (ROA)** shows how efficiently a company turns its asset base into profit.
-For beginner investors, a higher ROA usually signals stronger operating efficiency.
-""",
-        "takeaway": """
-Yum Brands usually leads on ROA, which suggests strong efficiency. McDonald's is also strong,
-while RBI stays lower, meaning its growth converts into profit less efficiently.
-""",
-    },
-    "Profit Margin": {
-        "label": "Profit Margin",
-        "good": "higher",
-        "as_pct": True,
-        "explanation": """
-**Profit Margin** measures how much of each dollar of revenue is kept as net income.
-Higher margins often point to stronger pricing power, better cost control, or both.
-""",
-        "takeaway": """
-McDonald's stands out for consistently high margins, which supports the idea that it has a mature,
-profitability-driven business model. RBI's lower margin suggests weaker profit conversion.
-""",
-    },
-    "ROE": {
-        "label": "ROE",
-        "good": "context-dependent",
-        "as_pct": True,
-        "explanation": """
-**Return on Equity (ROE)** measures profit relative to shareholders' equity.
-In this dataset, McDonald's and Yum Brands often show **negative ROE because equity is negative**,
-not because profit is weak. That means ROE should be interpreted alongside net income and leverage.
-""",
-        "takeaway": """
-RBI's ROE is easier to interpret because its equity stays positive. For McDonald's and Yum Brands,
-ROE alone can mislead beginners because capital structure distorts the ratio.
-""",
-    },
-    "Revenue Growth": {
-        "label": "Revenue Growth",
-        "good": "higher",
-        "as_pct": True,
-        "explanation": """
-**Revenue Growth** tracks how quickly sales increase from one year to the next.
-It is useful for spotting expansion potential, but strong growth is more convincing when it is supported by profitability.
-""",
-        "takeaway": """
-RBI shows the strongest recent growth, but its lower ROA and margins suggest that not all growth is high quality.
-Yum looks more balanced, while McDonald's combines uneven growth with very strong profits.
-""",
-    },
-    "Leverage": {
-        "label": "Leverage",
-        "good": "lower",
-        "as_pct": False,
-        "explanation": """
-**Leverage** here is measured as long-term debt divided by total assets.
-Higher leverage can support growth, but it also raises financial risk because the company depends more on debt financing.
-""",
-        "takeaway": """
-Yum Brands looks most debt-dependent, RBI most conservative, and McDonald's sits in the middle.
-For beginners, the key idea is that debt risk should be judged together with profitability, not by itself.
-""",
-    },
-}
-
-company_colors = {
-    "McDonald's": "#d62828",
-    "Yum Brands": "#1d3557",
-    "Restaurant Brands International": "#2a9d8f",
-}
-
-
-def format_value(metric: str, value: float) -> str:
+def format_metric(metric: str, value: float) -> str:
     if pd.isna(value):
         return "N/A"
-    if metric_meta[metric]["as_pct"]:
+    if metric in PERCENT_METRICS:
         return f"{value:.1%}"
     return f"{value:.2f}"
 
 
-def leader_text(summary_df: pd.DataFrame, metric: str) -> str:
-    valid = summary_df.dropna(subset=["mean"])
-    if valid.empty:
-        return "Not enough data to compare the selected metric."
-    ascending = metric_meta[metric]["good"] == "lower"
-    leader = valid.sort_values("mean", ascending=ascending).iloc[0]
-    if metric == "ROE":
-        return (
-            "ROE needs extra caution here: RBI is the cleanest comparison because its equity is positive, "
-            "while McDonald's and Yum Brands have negative equity that makes ROE less intuitive."
+def format_money(value: float) -> str:
+    if pd.isna(value):
+        return "N/A"
+    return f"${value:,.0f}m"
+
+
+def draw_line_chart(data: pd.DataFrame, metric: str, title: str, ylabel: str):
+    fig, ax = plt.subplots(figsize=(8, 4.8))
+    for company in data["company"].unique():
+        subset = data[data["company"] == company]
+        ax.plot(
+            subset["year"],
+            subset[metric],
+            marker="o",
+            linewidth=2.5,
+            markersize=6,
+            color=COMPANY_COLORS.get(company),
+            label=company,
         )
-    return (
-        f"Based on the average selected-period {metric}, **{leader['company']}** looks strongest "
-        f"for this metric at **{format_value(metric, leader['mean'])}**."
+    if metric == "Revenue Growth":
+        ax.axhline(0, linestyle="--", linewidth=1, color="#7a7a7a")
+    ax.set_title(title)
+    ax.set_xlabel("Year")
+    ax.set_ylabel(ylabel)
+    ax.grid(alpha=0.25)
+    ax.legend()
+    return fig
+
+
+def draw_grouped_bar_chart(data: pd.DataFrame, metric: str, title: str, ylabel: str):
+    pivot = data.pivot(index="year", columns="company", values=metric)
+    fig, ax = plt.subplots(figsize=(10, 5))
+    years = pivot.index.tolist()
+    companies = pivot.columns.tolist()
+    width = 0.22
+    x_positions = list(range(len(years)))
+
+    for idx, company in enumerate(companies):
+        offsets = [x + (idx - (len(companies) - 1) / 2) * width for x in x_positions]
+        ax.bar(
+            offsets,
+            pivot[company].values,
+            width=width,
+            label=company,
+            color=COMPANY_COLORS.get(company),
+        )
+
+    ax.set_xticks(x_positions)
+    ax.set_xticklabels(years)
+    ax.set_title(title)
+    ax.set_xlabel("Year")
+    ax.set_ylabel(ylabel)
+    ax.grid(axis="y", alpha=0.25)
+    ax.legend()
+    return fig
+
+
+def draw_box_plot(data: pd.DataFrame, metric: str, title: str, ylabel: str):
+    companies = data["company"].unique().tolist()
+    values = [data[data["company"] == company][metric].dropna() for company in companies]
+    fig, ax = plt.subplots(figsize=(9, 4.8))
+    box = ax.boxplot(values, labels=companies, patch_artist=True)
+    for patch, company in zip(box["boxes"], companies):
+        patch.set_facecolor(COMPANY_COLORS.get(company, "#cccccc"))
+        patch.set_alpha(0.65)
+    ax.set_title(title)
+    ax.set_xlabel("Company")
+    ax.set_ylabel(ylabel)
+    ax.grid(alpha=0.25)
+    ax.tick_params(axis="x", rotation=8)
+    return fig
+
+
+def build_summary_table(data: pd.DataFrame, selected_metrics: list[str]) -> pd.DataFrame:
+    latest_year = int(data["year"].max())
+    latest = data[data["year"] == latest_year].copy()
+    summary = latest[["company"] + selected_metrics].copy().sort_values("company")
+    for metric in selected_metrics:
+        summary[metric] = summary[metric].apply(lambda value: format_metric(metric, value))
+    return summary.rename(columns={metric: METRIC_LABELS[metric] for metric in selected_metrics})
+
+
+def build_snapshot(data: pd.DataFrame) -> pd.DataFrame:
+    latest_year = int(data["year"].max())
+    latest = data[data["year"] == latest_year].copy().sort_values("company")
+    snapshot = latest[["company", "ni", "ROA", "Profit Margin", "Revenue Growth", "Leverage"]].rename(
+        columns={"ni": "Net Income"}
     )
+    snapshot["Net Income"] = snapshot["Net Income"].apply(format_money)
+    snapshot["ROA"] = snapshot["ROA"].apply(lambda value: format_metric("ROA", value))
+    snapshot["Profit Margin"] = snapshot["Profit Margin"].apply(lambda value: format_metric("Profit Margin", value))
+    snapshot["Revenue Growth"] = snapshot["Revenue Growth"].apply(lambda value: format_metric("Revenue Growth", value))
+    snapshot["Leverage"] = snapshot["Leverage"].apply(lambda value: format_metric("Leverage", value))
+    return snapshot
 
 
-def company_snapshot(filtered_df: pd.DataFrame) -> pd.DataFrame:
-    latest_year = int(filtered_df["year"].max())
-    latest = filtered_df[filtered_df["year"] == latest_year].copy()
-    latest = latest[["company", "ROA", "Profit Margin", "Revenue Growth", "Leverage", "ni"]]
-    latest = latest.rename(columns={"ni": "Net Income"})
-    return latest.sort_values("company")
+df = load_data()
 
-
-st.title("Fast-Food Financial Dashboard for Beginner Investors")
-st.markdown(
-    """
-This interactive dashboard compares **McDonald's**, **Yum Brands**, and
-**Restaurant Brands International (RBI)** using a small set of key financial indicators.
-The goal is to help **beginner investors** compare profitability, growth, and financial risk
-without getting lost in too many metrics.
-
-The data covers **2019 to 2024** and focuses on five ratios used in your notebook analysis:
-`ROA`, `ROE`, `Profit Margin`, `Revenue Growth`, and `Leverage`.
-"""
-)
-
-st.sidebar.header("Dashboard Controls")
-selected_metric = st.sidebar.selectbox("Choose a metric", list(metric_meta.keys()))
+st.sidebar.header("Controls")
 selected_companies = st.sidebar.multiselect(
-    "Choose companies",
+    "Select companies",
     options=df["company"].unique().tolist(),
     default=df["company"].unique().tolist(),
 )
-year_range = st.sidebar.slider(
-    "Choose year range",
+selected_years = st.sidebar.slider(
+    "Select year range",
     min_value=int(df["year"].min()),
     max_value=int(df["year"].max()),
     value=(int(df["year"].min()), int(df["year"].max())),
 )
+summary_metrics = st.sidebar.multiselect(
+    "Select metrics for the summary table",
+    options=list(METRIC_LABELS.keys()),
+    default=["ROA", "Profit Margin", "Revenue Growth", "Leverage"],
+)
+show_dataset = st.sidebar.checkbox("Show processed dataset", value=False)
 
 filtered_df = df[
     (df["company"].isin(selected_companies))
-    & (df["year"].between(year_range[0], year_range[1]))
+    & (df["year"] >= selected_years[0])
+    & (df["year"] <= selected_years[1])
 ].copy()
 
 if filtered_df.empty:
-    st.warning("No data is available for the current filter selection.")
+    st.warning("No data is available for the current company and year selection.")
     st.stop()
 
-summary = (
-    filtered_df.groupby("company")[selected_metric]
-    .agg(["mean", "median", "min", "max", "std"])
-    .reset_index()
-)
-
 latest_year = int(filtered_df["year"].max())
-latest_values = filtered_df[filtered_df["year"] == latest_year][["company", selected_metric]].copy()
-latest_values = latest_values.sort_values(selected_metric, ascending=metric_meta[selected_metric]["good"] == "lower")
+summary_table = build_summary_table(filtered_df, summary_metrics or ["ROA", "Profit Margin"])
+snapshot_table = build_snapshot(filtered_df)
 
-col1, col2, col3 = st.columns(3)
-with col1:
-    st.metric("Companies Selected", len(selected_companies))
-with col2:
-    st.metric("Metric", selected_metric)
-with col3:
-    st.metric("Latest Year in View", latest_year)
-
-st.subheader(f"What Does {selected_metric} Tell Investors?")
-st.markdown(metric_meta[selected_metric]["explanation"])
-
-insight_col, leader_col = st.columns([1.2, 1])
-with insight_col:
-    st.info(metric_meta[selected_metric]["takeaway"])
-with leader_col:
-    st.success(leader_text(summary, selected_metric))
-
-st.subheader(f"{selected_metric} Trend Over Time")
-fig, ax = plt.subplots(figsize=(10, 5))
-for company in selected_companies:
-    company_df = filtered_df[filtered_df["company"] == company]
-    ax.plot(
-        company_df["year"],
-        company_df[selected_metric],
-        marker="o",
-        linewidth=2.5,
-        label=company,
-        color=company_colors.get(company),
-    )
-
-if selected_metric == "Revenue Growth":
-    ax.axhline(0, linestyle="--", linewidth=1, color="gray")
-
-ax.set_xlabel("Year")
-ax.set_ylabel(selected_metric)
-ax.set_title(f"{selected_metric} Comparison by Company")
-ax.grid(alpha=0.3)
-ax.legend()
-st.pyplot(fig)
-
-st.subheader(f"{latest_year} Cross-Section Comparison")
-fig_bar, ax_bar = plt.subplots(figsize=(10, 5))
-bars = ax_bar.bar(
-    latest_values["company"],
-    latest_values[selected_metric],
-    color=[company_colors.get(company) for company in latest_values["company"]],
-)
-ax_bar.set_title(f"{selected_metric} in {latest_year}")
-ax_bar.set_ylabel(selected_metric)
-ax_bar.grid(axis="y", alpha=0.3)
-ax_bar.tick_params(axis="x", rotation=10)
-
-for bar, value in zip(bars, latest_values[selected_metric]):
-    text_y = value if value >= 0 else value - abs(value) * 0.08
-    vertical_align = "bottom" if value >= 0 else "top"
-    ax_bar.text(
-        bar.get_x() + bar.get_width() / 2,
-        text_y,
-        format_value(selected_metric, value),
-        ha="center",
-        va=vertical_align,
-        fontsize=9,
-    )
-
-st.pyplot(fig_bar)
-
-st.subheader(f"Distribution and Volatility of {selected_metric}")
-fig_box, ax_box = plt.subplots(figsize=(9, 5))
-box_data = [
-    filtered_df[filtered_df["company"] == company][selected_metric].dropna()
-    for company in selected_companies
-]
-box = ax_box.boxplot(box_data, labels=selected_companies, patch_artist=True)
-for patch, company in zip(box["boxes"], selected_companies):
-    patch.set_facecolor(company_colors.get(company, "#cccccc"))
-    patch.set_alpha(0.65)
-ax_box.set_title(f"Box Plot of {selected_metric}")
-ax_box.set_ylabel(selected_metric)
-ax_box.grid(alpha=0.3)
-ax_box.tick_params(axis="x", rotation=10)
-st.pyplot(fig_box)
-
+st.title("Interactive Financial Dashboard for Beginner Investors")
 st.markdown(
     """
-The **box plot** helps beginner investors judge how stable each company's performance is over time.
-A narrower box usually means more consistency, while a wider box suggests greater fluctuation and uncertainty.
+This dashboard compares **McDonald's**, **Yum Brands**, and **Restaurant Brands International (RBI)**
+using a **small set of key financial ratios**. The purpose is to answer one practical question:
+
+**How can beginner investors use a limited number of financial indicators to compare the investment attractiveness of companies?**
+
+The focus is on **clarity and interpretation**, not on building a complicated valuation model.
+All analysis is based on annual data from **2019 to 2024** and is organized around
+**profitability, growth, and financial risk**.
 """
 )
 
-st.subheader("Summary Table")
-summary_display = summary.copy()
-for column in ["mean", "median", "min", "max", "std"]:
-    summary_display[column] = summary_display[column].apply(lambda x: format_value(selected_metric, x))
-st.dataframe(summary_display, use_container_width=True)
+intro_col1, intro_col2, intro_col3 = st.columns(3)
+with intro_col1:
+    st.metric("Companies in View", len(filtered_df["company"].unique()))
+with intro_col2:
+    st.metric("Years in View", f"{selected_years[0]}-{selected_years[1]}")
+with intro_col3:
+    st.metric("Latest Year Used", latest_year)
+
+st.subheader("Data and Variables")
+st.markdown(
+    """
+The dataset comes from **Compustat via WRDS** and includes three global fast-food companies:
+**McDonald's**, **Yum Brands**, and **Restaurant Brands International**.
+
+The raw variables used in the notebook are:
+`Net Income (ni)`, `Total Assets (at)`, `Shareholders' Equity (ceq)`,
+`Revenue (sale)`, and `Long-Term Debt (dltt)`.
+
+These variables are transformed into five ratios:
+
+- `ROA = Net Income / Total Assets`
+- `ROE = Net Income / Equity`
+- `Profit Margin = Net Income / Revenue`
+- `Revenue Growth = (Revenue_t - Revenue_(t-1)) / Revenue_(t-1)`
+- `Leverage = Long-Term Debt / Total Assets`
+
+This keeps the dashboard consistent with the ratios you calculated in the notebook.
+"""
+)
+
+st.subheader("Latest-Year Summary Table")
+st.dataframe(summary_table, use_container_width=True)
 
 st.subheader("Latest Company Snapshot")
-snapshot = company_snapshot(filtered_df).copy()
-for col in ["ROA", "Profit Margin", "Revenue Growth"]:
-    snapshot[col] = snapshot[col].apply(lambda x: "N/A" if pd.isna(x) else f"{x:.1%}")
-snapshot["Leverage"] = snapshot["Leverage"].apply(lambda x: f"{x:.2f}")
-snapshot["Net Income"] = snapshot["Net Income"].apply(lambda x: f"${x:,.0f}m")
-st.dataframe(snapshot, use_container_width=True)
+st.dataframe(snapshot_table, use_container_width=True)
 
-st.subheader("Interpretation for Beginner Investors")
-if selected_metric == "ROA":
-    st.markdown(
-        """
-Yum Brands generally looks strongest on efficiency, McDonald's remains solid, and RBI trails behind.
-For a beginner investor, this suggests Yum and McDonald's are better at turning resources into profit.
-"""
-    )
-elif selected_metric == "Profit Margin":
-    st.markdown(
-        """
-McDonald's usually leads on margin, which means it keeps more profit from each dollar of sales.
-That makes its performance easier to defend even when revenue growth is not the most stable.
-"""
-    )
-elif selected_metric == "ROE":
-    st.markdown(
-        """
-ROE is useful, but here it can be misleading because McDonald's and Yum Brands have negative equity.
-The safer lesson is to treat ROE as a starting point, then check net income and leverage before drawing conclusions.
-"""
-    )
-elif selected_metric == "Revenue Growth":
-    st.markdown(
-        """
-RBI offers the strongest growth story, but growth alone does not make it the best investment candidate.
-Your notebook's key insight still holds: growth should be judged together with profitability and efficiency.
-"""
-    )
-else:
-    st.markdown(
-        """
-Leverage adds the risk dimension to the dashboard. Lower debt exposure is safer, but the best company is not always
-the one with the lowest leverage; it is the one that balances debt, profitability, and growth most effectively.
-"""
-    )
-
-st.subheader("Overall Conclusion")
+st.markdown("---")
+st.header("Step 1. Profitability Analysis: ROA and Profit Margin")
 st.markdown(
     """
-Across the three companies, **no single firm dominates every dimension**.
-**McDonald's** looks the most balanced overall, with strong profitability and manageable leverage.
-**Yum Brands** appears efficient and relatively consistent, but it depends more heavily on debt.
-**RBI** delivers stronger recent growth, yet its profitability remains weaker, which makes its growth quality less convincing.
-
-For beginner investors, the main lesson is simple: **do not rely on just one ratio**.
-Comparing profitability, growth, and risk together produces a much more reliable investment story.
+This section compares **ROA** and **Profit Margin** to show how the three firms differ in
+profitability and operating efficiency.
 """
 )
 
-with st.expander("View Processed Dataset"):
-    display_df = filtered_df.copy()
-    st.dataframe(display_df, use_container_width=True)
+profit_col1, profit_col2 = st.columns(2)
+with profit_col1:
+    st.pyplot(draw_line_chart(filtered_df, "ROA", "ROA Over Time", "ROA"))
+with profit_col2:
+    st.pyplot(draw_line_chart(filtered_df, "Profit Margin", "Profit Margin Over Time", "Profit Margin"))
+
+st.markdown(
+    """
+**Structural Differences in Performance**
+
+- **Yum Brands** consistently operates at a higher level across both ROA and Profit Margin, suggesting a structurally stronger and more mature business model.
+- **Restaurant Brands International** remains at the lower end throughout the period, indicating a persistent weakness in its profitability base rather than a temporary fluctuation.
+- **McDonald's** stays in the middle-to-high range, reflecting solid but not extreme overall performance.
+
+**Profitability vs Efficiency**
+
+- Comparing the two charts highlights a useful distinction. **McDonald's** achieves relatively high profit margins but lower ROA, implying that its asset utilization is less efficient.
+- **Yum Brands** maintains leading ROA despite not always having the highest margins, indicating a stronger ability to convert assets into returns.
+
+**Resilience and Common Trends**
+
+- All three firms decline around 2020, which points to a shared external shock rather than a purely firm-specific problem.
+- **Yum Brands** then shows a sharp rebound in 2021, suggesting resilience and a mean-reversion pattern.
+- **McDonald's** also recovers strongly, while **RBI** remains at a lower level, which suggests weaker internal resilience.
+"""
+)
+
+st.markdown("---")
+st.header("Step 2. ROE in Context: ROE and Net Income")
+st.markdown(
+    """
+Return on Equity (ROE) gives a quick view of returns generated from shareholders' capital.
+However, to interpret ROE properly, it needs to be read together with **Net Income**.
+That is especially important when equity is unusual or negative.
+"""
+)
+
+roe_col1, roe_col2 = st.columns(2)
+with roe_col1:
+    st.pyplot(draw_line_chart(filtered_df, "ROE", "Return on Equity (ROE) Over Time", "ROE"))
+with roe_col2:
+    st.pyplot(draw_line_chart(filtered_df, "ni", "Net Income Over Time", "Net Income ($m)"))
+
+st.warning(
+    """
+McDonald's and Yum Brands show negative ROE in several years because their equity is negative.
+That does **not** mean these firms are unprofitable. In the notebook data, both companies still report positive net income.
+"""
+)
+
+st.markdown(
+    """
+**Why Are Some ROE Values Negative?**
+
+The negative ROE observed for **McDonald's** and **Yum Brands** is **not driven by poor profitability**.
+Both firms report positive net income throughout the period. Instead, the negative ROE is mainly caused by
+their **negative equity base**, likely linked to high leverage and share repurchase activity.
+
+**Comparison Across Firms**
+
+- **RBI** maintains a positive equity base, so its ROE is more reliable and easier to interpret.
+- The negative ROE of McDonald's and Yum Brands is better understood as a **structural artifact** than as evidence of weak operations.
+
+**Implications for Beginner Investors**
+
+- ROE is useful as a starting point, but it should not be used in isolation.
+- A better comparison combines **ROE**, **Net Income**, and **Leverage**.
+- This helps separate true profitability from financial-structure effects.
+
+**Investment Perspective**
+
+All three firms are profitable, but their financial structures differ sharply.
+McDonald's and Yum Brands generate strong earnings, yet their capital structure can distort ROE and increase financial risk.
+RBI has a more interpretable ROE profile, but that does not automatically make it the strongest investment.
+"""
+)
+
+st.markdown("---")
+st.header("Step 3. Growth Analysis: Revenue Growth")
+st.markdown(
+    """
+Revenue growth measures how quickly sales expand over time and helps investors judge a firm's
+expansion potential. But growth is most meaningful when it is read together with profitability and efficiency.
+"""
+)
+
+st.pyplot(draw_line_chart(filtered_df, "Revenue Growth", "Revenue Growth Comparison", "Revenue Growth"))
+
+growth_tab1, growth_tab2, growth_tab3 = st.tabs(
+    ["RBI: Growth Story", "McDonald's: Profitability Story", "Yum: Balanced Story"]
+)
+
+with growth_tab1:
+    st.markdown(
+        """
+### RBI: Growth Driven by Expansion, Not Efficiency
+
+RBI maintains positive growth from 2021 to 2024 and reaches close to 20% in 2024.
+On the surface, this makes it look like the strongest growth company in the sample.
+
+However, when this is compared with **ROA**, **profit margin**, and **net income**, the picture changes:
+
+- Its ROA stays the lowest among the three firms.
+- Its profit margin also remains the lowest.
+- Net income improves, but its absolute level remains far below McDonald's.
+
+This suggests that RBI is expanding revenue, but it is less effective at converting that growth into profit and asset returns.
+Its growth therefore looks more like **scale expansion** than **high-quality efficient growth**.
+"""
+    )
+
+with growth_tab2:
+    st.markdown(
+        """
+### McDonald's: Volatile Growth with Strong Profitability
+
+McDonald's shows the most volatile revenue-growth pattern.
+If growth were the only metric, it could appear less attractive.
+
+But the earlier charts show a different story:
+
+- Net income remains the highest across the sample.
+- Profit margin is consistently the highest.
+- ROA is clearly stronger than RBI.
+
+This means McDonald's does not depend on smooth growth to produce strong performance.
+Its investment profile is **profitability-driven**: strong earnings can offset growth volatility.
+"""
+    )
+
+with growth_tab3:
+    st.markdown(
+        """
+### Yum Brands: Balanced and Sustainable Growth
+
+Yum Brands shows moderate growth without extreme swings.
+Compared with the other two firms, it appears more balanced:
+
+- It has the highest ROA.
+- Profit margin is solid and relatively stable.
+- Net income grows in a steady way.
+
+This suggests Yum is not simply chasing aggressive expansion.
+Instead, it combines growth, efficiency, and profitability in a more sustainable pattern.
+For beginner investors, this can look more predictable than a pure growth story.
+"""
+    )
+
+st.markdown(
+    """
+**Main Takeaway from Revenue Growth**
+
+Revenue growth should not be interpreted mechanically. A high growth rate can be attractive,
+but it does not guarantee strong investment quality unless the company can also turn that growth
+into strong margins, efficient asset use, and reliable earnings.
+"""
+)
+
+st.markdown("---")
+st.header("Step 4. Risk Analysis: Leverage")
+st.markdown(
+    """
+Leverage captures the financial-risk side of the dashboard.
+In this project, the analysis focuses on both:
+
+- the **level** of leverage across years, and
+- the **stability** of leverage over time.
+
+This is where the notebook moves beyond line charts and uses a **grouped bar chart** and a **box plot**.
+"""
+)
+
+risk_col1, risk_col2 = st.columns(2)
+with risk_col1:
+    st.pyplot(
+        draw_grouped_bar_chart(
+            filtered_df,
+            "Leverage",
+            "Leverage Ratio by Company and Year",
+            "Leverage (Long-Term Debt / Total Assets)",
+        )
+    )
+with risk_col2:
+    st.pyplot(
+        draw_box_plot(
+            filtered_df,
+            "Leverage",
+            "Distribution of Leverage by Company",
+            "Leverage (Long-Term Debt / Total Assets)",
+        )
+    )
+
+st.markdown(
+    """
+The **grouped bar chart** shows the level and trend of leverage over time.
+The **box plot** shows volatility and distribution:
+
+- the median line indicates the typical leverage level,
+- the height of the box indicates stability versus fluctuation,
+- and the whiskers capture more extreme values.
+"""
+)
+
+st.markdown(
+    """
+**Basic Interpretation**
+
+Higher leverage generally implies greater financial risk because a larger share of the firm's capital structure depends on debt.
+From that perspective, **Yum Brands** appears the riskiest, **RBI** the most conservative, and **McDonald's** lies in between.
+
+However, leverage should not be assessed in isolation.
+Debt becomes more concerning when the company lacks the profitability and efficiency needed to support it.
+
+### Yum Brands: Stable operations, but debt-dependent structure
+
+Yum Brands looks stable in growth and reasonably strong in profitability.
+But its consistently high leverage suggests that some of this stability is supported by a debt-heavy capital structure.
+
+- Interest obligations can reduce financial flexibility.
+- The company may be more exposed in economic slowdowns.
+- Future expansion may depend more heavily on financing conditions.
+
+### McDonald's: Moderate leverage supported by strong fundamentals
+
+McDonald's has more volatile growth, but its leverage remains relatively controlled.
+At the same time, it also shows the strongest profitability metrics in the sample.
+That makes its leverage look **manageable rather than excessive**, because strong earnings provide a buffer.
+
+### RBI: Conservative financing, but weaker efficiency
+
+RBI has the lowest leverage, which lowers balance-sheet risk.
+But low leverage does not automatically mean the best investment.
+Its weaker profitability and lower returns show that conservative financing alone does not guarantee attractiveness.
+"""
+)
+
+st.markdown(
+    """
+**What Does Leverage Volatility Indicate?**
+
+Leverage volatility helps investors read more than just the average debt level.
+It gives clues about:
+
+- **Capital Structure Stability**: low volatility suggests a stable financing policy, while high volatility signals more change.
+- **Financing Strategy**: stable leverage looks more deliberate; fluctuating leverage may reflect changing borrowing needs.
+- **Financial Risk and Uncertainty**: high leverage combined with high volatility makes the risk profile less predictable.
+
+The box plot shows a clear structural difference:
+
+- **Yum Brands** combines the highest leverage with the widest distribution, meaning both debt dependence and variability are high.
+- **McDonald's** sits in the middle, with moderate leverage and relatively stable dispersion.
+- **RBI** has the lowest leverage and the narrowest distribution, suggesting a conservative financing approach.
+
+When combined with the earlier profitability and growth charts, the leverage analysis leads to a more nuanced conclusion:
+
+- Yum Brands looks operationally strong, but leverage introduces hidden risk.
+- McDonald's combines strong profitability with manageable leverage, giving it a more balanced profile.
+- RBI looks safer on debt, but weaker on performance.
+
+For beginner investors, the key lesson is that leverage becomes meaningful only when it is interpreted together with growth and profitability.
+"""
+)
+
+st.markdown("---")
+st.header("Conclusion")
+st.markdown(
+    """
+All three companies show very different financial profiles when profitability, growth, and risk are considered together.
+
+- **Yum Brands** demonstrates strong profitability and efficiency, but its leverage is both higher and more variable, which adds financial risk beneath otherwise stable operating performance.
+- **McDonald's** presents the most balanced profile. It combines strong profitability with moderate leverage, making it a relatively stable and predictable option.
+- **Restaurant Brands International** stands out for growth, but its weaker profitability means that growth alone does not make it the most attractive investment candidate.
+
+Overall, **no single company dominates in every category**.
+The broader lesson for beginner investors is that **one ratio is never enough**.
+The best comparison comes from combining a small set of metrics and asking whether a company's performance is supported by genuine operating strength or by a riskier financial structure.
+"""
+)
+
+if show_dataset:
+    st.markdown("---")
+    st.subheader("Processed Dataset")
+    st.dataframe(filtered_df, use_container_width=True)
