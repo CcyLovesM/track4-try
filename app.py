@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 # Page setup
 # -------------------------------------------------
 st.set_page_config(
-    page_title="Beginner Investor Dashboard",
+    page_title="Beginner Investor Comparison Dashboard",
     layout="wide"
 )
 
@@ -28,7 +28,7 @@ data = [
     {"company": "McDonald's", "year": 2024, "sale": 25920.0, "ni": 8223.0, "at": 55182.0, "ceq": -3797.0, "dltt": 51312.0,
      "roa": 0.149016, "roe": -2.165657, "profit_margin": 0.317245, "leverage": 0.929868, "revenue_growth": 0.016722},
 
-    # Restaurant Brands International
+    # RBI
     {"company": "Restaurant Brands International", "year": 2019, "sale": 5603.0, "ni": 643.0, "at": 22360.0, "ceq": 2490.0, "dltt": 13136.0,
      "roa": 0.028757, "roe": 0.258233, "profit_margin": 0.114760, "leverage": 0.587478, "revenue_growth": None},
     {"company": "Restaurant Brands International", "year": 2020, "sale": 4968.0, "ni": 486.0, "at": 22777.0, "ceq": 2167.0, "dltt": 13794.0,
@@ -61,11 +61,47 @@ df = pd.DataFrame(data)
 
 metric_labels = {
     "roa": "ROA",
-    "roe": "ROE",
     "profit_margin": "Profit Margin",
+    "roe": "ROE",
     "revenue_growth": "Revenue Growth",
     "leverage": "Leverage",
     "ni": "Net Income"
+}
+
+metric_explanations = {
+    "roa": "ROA shows how efficiently a company uses its assets to generate profit.",
+    "profit_margin": "Profit Margin shows how much profit a company keeps from its revenue.",
+    "roe": "ROE shows how efficiently a company generates returns on shareholders’ equity.",
+    "revenue_growth": "Revenue Growth measures how quickly a company increases its sales over time.",
+    "leverage": "Leverage reflects the extent to which a company relies on debt financing.",
+    "ni": "Net Income shows the absolute level of profit earned by the company."
+}
+
+metric_takeaways = {
+    "roa": """
+A higher and more stable ROA usually suggests stronger operating efficiency.  
+For beginner investors, this helps show which company converts assets into earnings more effectively.
+""",
+    "profit_margin": """
+A higher profit margin suggests stronger cost control and pricing power.  
+For beginner investors, stable margins can signal business quality and resilience.
+""",
+    "roe": """
+ROE can be useful, but it should not be read alone.  
+If equity is negative, ROE may become misleading even when the company is profitable.
+""",
+    "revenue_growth": """
+Revenue growth helps show expansion potential, but growth alone is not enough.  
+Beginner investors should always compare growth with profitability and risk.
+""",
+    "leverage": """
+Higher leverage may raise financial risk, especially if earnings weaken.  
+For beginner investors, debt should be judged together with profitability, not on its own.
+""",
+    "ni": """
+Net Income shows absolute earnings power.  
+For beginner investors, it is useful for checking whether a company is truly profitable, especially when ratios look unusual.
+"""
 }
 
 # -------------------------------------------------
@@ -113,13 +149,14 @@ st.title("📊 Beginner Investor Comparison Dashboard")
 st.markdown("""
 This app translates the notebook analysis into an interactive dashboard for **beginner investors**.  
 It compares **McDonald's, Yum Brands, and Restaurant Brands International (RBI)** using a small set of financial ratios:
-**ROA, Profit Margin, ROE, Revenue Growth, and Leverage**.
+**ROA, Profit Margin, ROE, Revenue Growth, Leverage, and Net Income**.
 """)
 
 # -------------------------------------------------
 # Sidebar
 # -------------------------------------------------
 st.sidebar.header("Dashboard Controls")
+
 selected_metric = st.sidebar.selectbox(
     "Choose a metric for quick comparison:",
     ["roa", "profit_margin", "roe", "revenue_growth", "leverage", "ni"],
@@ -132,12 +169,13 @@ selected_companies = st.sidebar.multiselect(
     default=df["company"].unique().tolist()
 )
 
-filtered_df = df[df["company"].isin(selected_companies)]
+filtered_df = df[df["company"].isin(selected_companies)].copy()
 
 # -------------------------------------------------
-# Quick interactive section
+# Interactive Overview
 # -------------------------------------------------
 st.header("1. Interactive Overview")
+
 col1, col2 = st.columns([2, 1])
 
 with col1:
@@ -150,22 +188,30 @@ with col1:
 
 with col2:
     st.subheader("Quick Meaning")
-    explanations = {
-        "roa": "ROA shows how efficiently a company uses its assets to generate profit.",
-        "profit_margin": "Profit Margin shows how much profit a company keeps from its revenue.",
-        "roe": "ROE shows how efficiently a company generates returns on shareholders’ equity.",
-        "revenue_growth": "Revenue Growth measures how quickly a company increases its sales over time.",
-        "leverage": "Leverage reflects the extent to which a company relies on debt financing.",
-        "ni": "Net Income shows the absolute level of profit earned by the company."
-    }
-    st.info(explanations[selected_metric])
+    st.info(metric_explanations[selected_metric])
 
-    summary = filtered_df.groupby("company")[selected_metric].agg(["mean", "min", "max"]).round(3)
     st.subheader("Summary Statistics")
-    st.dataframe(summary)
+    summary = (
+        filtered_df.groupby("company")[selected_metric]
+        .agg(mean="mean", min="min", max="max")
+        .round(3)
+        .reset_index()
+    )
+    st.dataframe(summary, use_container_width=True, hide_index=True)
+
+st.subheader(f"Why {metric_labels[selected_metric]} matters")
+st.markdown(metric_takeaways[selected_metric])
+
+st.subheader(f"{metric_labels[selected_metric]} Distribution")
+plot_box(
+    filtered_df,
+    selected_metric,
+    f"Distribution of {metric_labels[selected_metric]} by Company",
+    metric_labels[selected_metric]
+)
 
 with st.expander("View processed data table"):
-    st.dataframe(df)
+    st.dataframe(df, use_container_width=True)
 
 st.markdown("---")
 
@@ -175,15 +221,10 @@ st.markdown("---")
 st.header("2. Step 1. Profitability: ROA and Profit Margin")
 st.markdown("""
 This section uses **ROA** and **Profit Margin** to provide a simple comparison of firms' profitability for beginner investors.
-
-\[
-ROA = \frac{Net\ Income}{Total\ Assets}
-\]
-
-\[
-Profit\ Margin = \frac{NI}{SALE}
-\]
 """)
+
+st.latex(r"ROA = \frac{Net\ Income}{Total\ Assets}")
+st.latex(r"Profit\ Margin = \frac{NI}{SALE}")
 
 c1, c2 = st.columns(2)
 with c1:
@@ -218,11 +259,9 @@ st.header("3. Step 2. ROE")
 st.markdown("""
 Return on Equity (ROE) provides a quick measure of how efficiently a company generates returns on shareholders’ capital.  
 To ensure a more accurate interpretation, this step complements **ROE** with **Net Income** to distinguish between true profitability and the effects of financial structure.
-
-\[
-ROE = \frac{Net\ Income}{Equity}
-\]
 """)
+
+st.latex(r"ROE = \frac{Net\ Income}{Equity}")
 
 c3, c4 = st.columns(2)
 with c3:
@@ -257,11 +296,11 @@ st.markdown("---")
 st.header("4. Step 3. Revenue Growth")
 st.markdown("""
 Revenue growth measures how quickly a company increases its sales over time and reflects its expansion potential.
+""")
 
-\[
-Revenue\ Growth = \frac{Revenue_t - Revenue_{t-1}}{Revenue_{t-1}}
-\]
+st.latex(r"Revenue\ Growth = \frac{Revenue_t - Revenue_{t-1}}{Revenue_{t-1}}")
 
+st.markdown("""
 This metric helps investors assess whether a firm can sustain and grow its operations beyond current profitability.
 """)
 
@@ -318,11 +357,9 @@ st.header("5. Step 4. Risk Analysis — Leverage")
 st.markdown("""
 Leverage is used to evaluate a company’s financial risk by showing how much debt it uses relative to its asset base.  
 In general, a higher leverage ratio suggests greater financial risk, because the company may face stronger repayment pressure and higher sensitivity to changes in earnings or interest rates.
-
-\[
-Leverage = \frac{Long\text{-}Term\ Debt}{Total\ Assets}
-\]
 """)
+
+st.latex(r"Leverage = \frac{Long\text{-}Term\ Debt}{Total\ Assets}")
 
 st.subheader("5.1 Use Group Bar Chart to show risk level and risk trend")
 plot_grouped_bar(
@@ -425,10 +462,13 @@ All three companies' financial characteristics differ significantly when **profi
 
 **Restaurant Brands International** stands out for its higher growth potential, but this comes with weaker profitability and greater overall risk. Its financial structure appears less stable, suggesting that its performance may be more sensitive to external factors. For beginner investors, this highlights the importance of not relying solely on growth indicators.
 
-Overall, **no single company dominates across all dimensions**.  
+Overall, **no single company dominates across all dimensions**.
+
 - **Yum Brands** is strong but carries leverage-related risk.  
 - **McDonald’s** offers the most balanced risk-return profile.  
 - **Restaurant Brands International** represents a higher-risk, higher-growth profile.
 """)
 
-st.success("This dashboard is designed for educational purposes and shows why beginner investors should compare multiple financial ratios together rather than relying on one metric alone.")
+st.success(
+    "This dashboard is designed for educational purposes and shows why beginner investors should compare multiple financial ratios together rather than relying on one metric alone."
+)
