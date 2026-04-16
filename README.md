@@ -30,8 +30,8 @@ The dataset is constructed from **Compustat (via WRDS)** and includes:
 - Revenue (`sale`)
 - Long-Term Debt (`dltt`)
 
-Time period: **2019 – 2024**
-
+Time period: 2019 – 2024
+Access Date: 10 April 2026
 
 ## 3. Methodology
 
@@ -129,3 +129,6 @@ This project includes a **Streamlit dashboard** that allows users to:
 - View a latest-year snapshot table  
 
 The app is designed to make financial analysis **interactive and beginner-friendly**.
+
+## 6. Product link / Demo
+Streamlit app: [Open the app](https://track4-try-czb8yezn3kf3w7ybqkdap2.streamlit.app)
