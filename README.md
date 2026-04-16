@@ -1,31 +1,26 @@
-# 📊 Comparing Investment Attractiveness Using Financial Ratios
+# Comparing Investment Attractiveness Using Financial Ratios
 
-## 🔍 Overview
+## 1. Overview
 
 This project builds an **interactive financial dashboard** to help **beginner investors**
-compare the investment attractiveness of companies using a **small set of key financial ratios**.
+compare the investment attractiveness of companies using a small set of key financial ratios.
 
 Instead of using complex valuation models, the project focuses on **clarity, intuition, and practical interpretation**.
 
 The dashboard compares three global fast-food companies:
 
 - McDonald's  
-- Yum Brands  
-- Restaurant Brands International (RBI)  
+- Yum Brands(KFC, Pizza Hut, Taco Bell...)
+- Restaurant Brands International (RBI)(Burger King, Tim Hortons, Popeyes...)
 
-Users can explore how these firms differ in **profitability, growth, and financial risk** through an interactive Streamlit app.
+Users can explore how these firms differ in profitability, growth, and financial risk through an interactive Streamlit app.
 
----
+The goal is to provide a clear and intuitive framework that helps beginner investors make informed comparisons across companies.
 
-## 🎯 Objective
+This project emphasizes clarity and interpretability over complexity.
 
-**How can beginner investors use a small set of financial ratios to compare companies?**
 
-This project answers that question by transforming raw financial data into a structured, easy-to-interpret decision framework.
-
----
-
-## 📂 Data Source
+## 2. Data Source
 
 The dataset is constructed from **Compustat (via WRDS)** and includes:
 
@@ -37,15 +32,14 @@ The dataset is constructed from **Compustat (via WRDS)** and includes:
 
 Time period: **2019 – 2024**
 
----
 
-## ⚙️ Methodology
+## 3. Methodology
 
-### 1. Data Processing
+### Data Processing
 - Cleaned and structured panel data by company and year
 - Calculated financial ratios
 
-### 2. Key Financial Ratios
+### Key Financial Ratios
 
 - **ROA (Return on Assets)** = Net Income / Total Assets  
 - **ROE (Return on Equity)** = Net Income / Equity  
@@ -53,7 +47,7 @@ Time period: **2019 – 2024**
 - **Revenue Growth** = Year-over-year revenue change  
 - **Leverage** = Long-Term Debt / Total Assets  
 
-### 3. Visualization
+### Visualization
 
 The app uses multiple chart types to improve interpretation:
 
@@ -61,47 +55,37 @@ The app uses multiple chart types to improve interpretation:
 - Grouped bar charts → cross-company comparison  
 - Box plots → volatility and distribution  
 
----
 
-## 📊 Key Insights
+## 4. Key Insights
 
-### 🔹 Profitability
+### Profitability
 
 - **Yum Brands** shows the highest and most consistent ROA → strong asset efficiency  
 - **McDonald's** has the highest profit margin → strong pricing power  
 - **RBI** remains structurally weaker in profitability  
 
----
-
-### 🔹 Growth
+### Growth
 
 - **RBI** has the highest revenue growth → expansion-driven strategy  
 - **McDonald's** shows volatile growth but strong earnings → profitability-driven model  
 - **Yum Brands** demonstrates stable and balanced growth  
 
----
-
-### 🔹 Risk (Leverage)
+### Risk (Leverage)
 
 - **Yum Brands** has the highest and most volatile leverage → higher financial risk  
 - **McDonald's** maintains moderate leverage supported by strong profits  
 - **RBI** has the lowest leverage but weaker performance  
 
----
+### Key Investment Takeaway
 
-### 🔹 Key Investment Takeaway
-
-No single company dominates across all metrics.
-
-👉 Strong growth does not guarantee profitability  
-👉 High profitability can offset growth volatility  
-👉 Leverage adds hidden risk  
+- Strong growth does not guarantee profitability  
+- High profitability can offset growth volatility  
+- Leverage adds hidden risk  
 
 **Beginner investors should always combine multiple ratios rather than rely on a single metric.**
 
----
 
-## 🖥️ Interactive App
+## 5. Interactive App
 
 This project includes a **Streamlit dashboard** that allows users to:
 
@@ -116,9 +100,8 @@ This project includes a **Streamlit dashboard** that allows users to:
 
 The app is designed to make financial analysis **interactive and beginner-friendly**.
 
----
 
-## ▶️ How to Run
+## How to Run
 
 ```bash
 streamlit run app.py
