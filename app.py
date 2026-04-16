@@ -20,24 +20,24 @@ PERCENT_METRICS = {"ROA", "ROE", "Profit Margin", "Revenue Growth"}
 
 def load_data() -> pd.DataFrame:
     records = [
-        {"company": "McDonald's", "year": 2019, "sale": 21076.5, "ni": 6025.4, "at": 47510.8, "ceq": -8210.3, "dltt": 46875.9},
-        {"company": "McDonald's", "year": 2020, "sale": 19207.8, "ni": 4730.5, "at": 52626.8, "ceq": -7824.9, "dltt": 48518.1},
-        {"company": "McDonald's", "year": 2021, "sale": 23222.9, "ni": 7545.2, "at": 53854.3, "ceq": -4601.0, "dltt": 48643.6},
-        {"company": "McDonald's", "year": 2022, "sale": 23182.6, "ni": 6177.4, "at": 50435.6, "ceq": -6003.4, "dltt": 48037.9},
-        {"company": "McDonald's", "year": 2023, "sale": 25493.7, "ni": 8468.8, "at": 56146.8, "ceq": -4706.7, "dltt": 50210.6},
-        {"company": "McDonald's", "year": 2024, "sale": 25920.0, "ni": 8223.0, "at": 55182.0, "ceq": -3797.0, "dltt": 51312.0},
-        {"company": "Restaurant Brands International", "year": 2019, "sale": 5603.0, "ni": 643.0, "at": 22360.0, "ceq": 2490.0, "dltt": 13136.0},
-        {"company": "Restaurant Brands International", "year": 2020, "sale": 4968.0, "ni": 486.0, "at": 22777.0, "ceq": 2167.0, "dltt": 13794.0},
-        {"company": "Restaurant Brands International", "year": 2021, "sale": 5739.0, "ni": 838.0, "at": 23246.0, "ceq": 2237.0, "dltt": 14319.0},
-        {"company": "Restaurant Brands International", "year": 2022, "sale": 6505.0, "ni": 1008.0, "at": 22746.0, "ceq": 2499.0, "dltt": 14177.0},
-        {"company": "Restaurant Brands International", "year": 2023, "sale": 7022.0, "ni": 1190.0, "at": 23391.0, "ceq": 2866.0, "dltt": 14225.0},
-        {"company": "Restaurant Brands International", "year": 2024, "sale": 8406.0, "ni": 1021.0, "at": 24632.0, "ceq": 3110.0, "dltt": 15511.0},
-        {"company": "Yum Brands", "year": 2019, "sale": 5597.0, "ni": 1294.0, "at": 5231.0, "ceq": -8016.0, "dltt": 10771.0},
-        {"company": "Yum Brands", "year": 2020, "sale": 5652.0, "ni": 904.0, "at": 5852.0, "ceq": -7891.0, "dltt": 11095.0},
-        {"company": "Yum Brands", "year": 2021, "sale": 6584.0, "ni": 1575.0, "at": 5966.0, "ceq": -8373.0, "dltt": 11971.0},
-        {"company": "Yum Brands", "year": 2022, "sale": 6842.0, "ni": 1325.0, "at": 5846.0, "ceq": -8876.0, "dltt": 12184.0},
-        {"company": "Yum Brands", "year": 2023, "sale": 7076.0, "ni": 1597.0, "at": 6231.0, "ceq": -7858.0, "dltt": 11899.0},
-        {"company": "Yum Brands", "year": 2024, "sale": 7567.0, "ni": 1486.0, "at": 6727.0, "ceq": -7648.0, "dltt": 12168.0},
+        {"code": "MCD", "company": "McDonald's", "year": 2019, "sale": 21076.5, "ni": 6025.4, "at": 47510.8, "ceq": -8210.3, "dltt": 46875.9},
+        {"code": "MCD", "company": "McDonald's", "year": 2020, "sale": 19207.8, "ni": 4730.5, "at": 52626.8, "ceq": -7824.9, "dltt": 48518.1},
+        {"code": "MCD", "company": "McDonald's", "year": 2021, "sale": 23222.9, "ni": 7545.2, "at": 53854.3, "ceq": -4601.0, "dltt": 48643.6},
+        {"code": "MCD", "company": "McDonald's", "year": 2022, "sale": 23182.6, "ni": 6177.4, "at": 50435.6, "ceq": -6003.4, "dltt": 48037.9},
+        {"code": "MCD", "company": "McDonald's", "year": 2023, "sale": 25493.7, "ni": 8468.8, "at": 56146.8, "ceq": -4706.7, "dltt": 50210.6},
+        {"code": "MCD", "company": "McDonald's", "year": 2024, "sale": 25920.0, "ni": 8223.0, "at": 55182.0, "ceq": -3797.0, "dltt": 51312.0},
+        {"code": "RBI", "company": "Restaurant Brands International", "year": 2019, "sale": 5603.0, "ni": 643.0, "at": 22360.0, "ceq": 2490.0, "dltt": 13136.0},
+        {"code": "RBI", "company": "Restaurant Brands International", "year": 2020, "sale": 4968.0, "ni": 486.0, "at": 22777.0, "ceq": 2167.0, "dltt": 13794.0},
+        {"code": "RBI", "company": "Restaurant Brands International", "year": 2021, "sale": 5739.0, "ni": 838.0, "at": 23246.0, "ceq": 2237.0, "dltt": 14319.0},
+        {"code": "RBI", "company": "Restaurant Brands International", "year": 2022, "sale": 6505.0, "ni": 1008.0, "at": 22746.0, "ceq": 2499.0, "dltt": 14177.0},
+        {"code": "RBI", "company": "Restaurant Brands International", "year": 2023, "sale": 7022.0, "ni": 1190.0, "at": 23391.0, "ceq": 2866.0, "dltt": 14225.0},
+        {"code": "RBI", "company": "Restaurant Brands International", "year": 2024, "sale": 8406.0, "ni": 1021.0, "at": 24632.0, "ceq": 3110.0, "dltt": 15511.0},
+        {"code": "YUM", "company": "Yum Brands", "year": 2019, "sale": 5597.0, "ni": 1294.0, "at": 5231.0, "ceq": -8016.0, "dltt": 10771.0},
+        {"code": "YUM", "company": "Yum Brands", "year": 2020, "sale": 5652.0, "ni": 904.0, "at": 5852.0, "ceq": -7891.0, "dltt": 11095.0},
+        {"code": "YUM", "company": "Yum Brands", "year": 2021, "sale": 6584.0, "ni": 1575.0, "at": 5966.0, "ceq": -8373.0, "dltt": 11971.0},
+        {"code": "YUM", "company": "Yum Brands", "year": 2022, "sale": 6842.0, "ni": 1325.0, "at": 5846.0, "ceq": -8876.0, "dltt": 12184.0},
+        {"code": "YUM", "company": "Yum Brands", "year": 2023, "sale": 7076.0, "ni": 1597.0, "at": 6231.0, "ceq": -7858.0, "dltt": 11899.0},
+        {"code": "YUM", "company": "Yum Brands", "year": 2024, "sale": 7567.0, "ni": 1486.0, "at": 6727.0, "ceq": -7648.0, "dltt": 12168.0},
     ]
     df = pd.DataFrame(records).sort_values(["company", "year"]).reset_index(drop=True)
     df["ROA"] = df["ni"] / df["at"]
@@ -132,8 +132,8 @@ def draw_box_plot(data: pd.DataFrame, metric: str, title: str, ylabel: str):
 def build_snapshot(data: pd.DataFrame) -> pd.DataFrame:
     latest_year = int(data["year"].max())
     latest = data[data["year"] == latest_year].copy().sort_values("company")
-    snapshot = latest[["company", "ni", "ROA", "Profit Margin", "Revenue Growth", "Leverage"]].rename(
-        columns={"ni": "Net Income"}
+    snapshot = latest[["code", "company", "ni", "ROA", "Profit Margin", "Revenue Growth", "Leverage"]].rename(
+        columns={"code": "Code", "ni": "Net Income"}
     )
     snapshot["Net Income"] = snapshot["Net Income"].apply(format_money)
     snapshot["ROA"] = snapshot["ROA"].apply(lambda value: format_metric("ROA", value))
