@@ -15,16 +15,6 @@ COMPANY_COLORS = {
     "Restaurant Brands International": "#2a9d8f",
 }
 
-METRIC_LABELS = {
-    "ROA": "ROA",
-    "ROE": "ROE",
-    "Net Income": "Net Income",
-    "Profit Margin": "Profit Margin",
-    "Revenue Growth": "Revenue Growth",
-    "Leverage": "Leverage",
-    "Conclusion": "Conclusion",
-}
-
 PERCENT_METRICS = {"ROA", "ROE", "Profit Margin", "Revenue Growth"}
 
 
@@ -139,15 +129,6 @@ def draw_box_plot(data: pd.DataFrame, metric: str, title: str, ylabel: str):
     return fig
 
 
-def build_summary_table(data: pd.DataFrame, selected_metrics: list[str]) -> pd.DataFrame:
-    latest_year = int(data["year"].max())
-    latest = data[data["year"] == latest_year].copy()
-    summary = latest[["company"] + selected_metrics].copy().sort_values("company")
-    for metric in selected_metrics:
-        summary[metric] = summary[metric].apply(lambda value: format_metric(metric, value))
-    return summary.rename(columns={metric: METRIC_LABELS[metric] for metric in selected_metrics})
-
-
 def build_snapshot(data: pd.DataFrame) -> pd.DataFrame:
     latest_year = int(data["year"].max())
     latest = data[data["year"] == latest_year].copy().sort_values("company")
@@ -167,7 +148,15 @@ df = load_data()
 st.sidebar.header("Controls")
 selected_view = st.sidebar.radio(
     "Choose analysis section",
-    options=["ROA", "Profit Margin", "ROE", "Net Income", "Revenue Growth", "Leverage", "Conclusion"],
+    options=[
+        "Introduction",
+        "Latest Company Snapshot",
+        "ROA & Profit Margin",
+        "ROE & Net Income",
+        "Revenue Growth",
+        "Leverage",
+        "Conclusion",
+    ],
 )
 selected_companies = st.sidebar.multiselect(
     "Select companies",
@@ -179,11 +168,6 @@ selected_years = st.sidebar.slider(
     min_value=int(df["year"].min()),
     max_value=int(df["year"].max()),
     value=(int(df["year"].min()), int(df["year"].max())),
-)
-summary_metrics = st.sidebar.multiselect(
-    "Choose summary table metrics",
-    options=["ROA", "ROE", "Profit Margin", "Revenue Growth", "Leverage"],
-    default=["ROA", "Profit Margin", "Revenue Growth", "Leverage"],
 )
 show_dataset = st.sidebar.checkbox("Show processed dataset", value=False)
 
@@ -198,12 +182,12 @@ if filtered_df.empty:
     st.stop()
 
 latest_year = int(filtered_df["year"].max())
-summary_table = build_summary_table(filtered_df, summary_metrics or ["ROA", "Profit Margin"])
 snapshot_table = build_snapshot(filtered_df)
 
-st.title("Interactive Financial Dashboard for Beginner Investors")
-st.markdown(
-    """
+if selected_view == "Introduction":
+    st.title("Interactive Financial Dashboard for Beginner Investors")
+    st.markdown(
+        """
 This dashboard compares **McDonald's**, **Yum Brands**, and **Restaurant Brands International (RBI)**
 using a **small set of key financial ratios**. The purpose is to answer one practical question:
 
@@ -213,19 +197,19 @@ The focus is on **clarity and interpretation**, not on building a complicated va
 All analysis is based on annual data from **2019 to 2024** and is organized around
 **profitability, growth, and financial risk**.
 """
-)
+    )
 
-intro_col1, intro_col2, intro_col3 = st.columns(3)
-with intro_col1:
-    st.metric("Companies in View", len(filtered_df["company"].unique()))
-with intro_col2:
-    st.metric("Years in View", f"{selected_years[0]}-{selected_years[1]}")
-with intro_col3:
-    st.metric("Latest Year Used", latest_year)
+    intro_col1, intro_col2, intro_col3 = st.columns(3)
+    with intro_col1:
+        st.metric("Companies in View", len(filtered_df["company"].unique()))
+    with intro_col2:
+        st.metric("Years in View", f"{selected_years[0]}-{selected_years[1]}")
+    with intro_col3:
+        st.metric("Latest Year Used", latest_year)
 
-st.subheader("Data and Variables")
-st.markdown(
-    """
+    st.subheader("Data and Variables")
+    st.markdown(
+        """
 The dataset comes from **Compustat via WRDS** and includes three global fast-food companies:
 **McDonald's**, **Yum Brands**, and **Restaurant Brands International**.
 
@@ -243,15 +227,20 @@ These variables are transformed into five ratios:
 
 This keeps the dashboard consistent with the ratios you calculated in the notebook.
 """
-)
+    )
 
-st.subheader("Latest-Year Summary Table")
-st.dataframe(summary_table, use_container_width=True)
+elif selected_view == "Latest Company Snapshot":
+    st.title("Latest Company Snapshot")
+    st.markdown(
+        f"""
+This section gives a compact **latest-year comparison** for the companies currently selected in the sidebar.
+The table uses the most recent year in view, which is **{latest_year}** under your current filter settings.
+"""
+    )
+    st.info("You can sort columns directly in the table to compare companies more easily.")
+    st.dataframe(snapshot_table, use_container_width=True)
 
-st.subheader("Latest Company Snapshot")
-st.dataframe(snapshot_table, use_container_width=True)
-
-if selected_view in {"ROA", "Profit Margin"}:
+elif selected_view == "ROA & Profit Margin":
     st.markdown("---")
     st.header("Step 1. Profitability Analysis: ROA and Profit Margin")
     st.markdown(
@@ -288,7 +277,7 @@ profitability and operating efficiency.
 """
     )
 
-elif selected_view in {"ROE", "Net Income"}:
+elif selected_view == "ROE & Net Income":
     st.markdown("---")
     st.header("Step 2. ROE in Context: ROE and Net Income")
     st.markdown(
