@@ -165,8 +165,8 @@ def build_snapshot(data: pd.DataFrame) -> pd.DataFrame:
 df = load_data()
 
 st.sidebar.header("Controls")
-selected_view = st.sidebar.selectbox(
-    "Select metric / section",
+selected_view = st.sidebar.radio(
+    "Choose analysis section",
     options=["ROA", "Profit Margin", "ROE", "Net Income", "Revenue Growth", "Leverage", "Conclusion"],
 )
 selected_companies = st.sidebar.multiselect(
@@ -181,7 +181,7 @@ selected_years = st.sidebar.slider(
     value=(int(df["year"].min()), int(df["year"].max())),
 )
 summary_metrics = st.sidebar.multiselect(
-    "Select metrics for the summary table",
+    "Choose summary table metrics",
     options=["ROA", "ROE", "Profit Margin", "Revenue Growth", "Leverage"],
     default=["ROA", "Profit Margin", "Revenue Growth", "Leverage"],
 )
