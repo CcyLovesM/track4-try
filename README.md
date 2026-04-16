@@ -58,23 +58,55 @@ The app uses multiple chart types to improve interpretation:
 
 ## 4. Key Insights
 
-### Profitability
 
-- **Yum Brands** shows the highest and most consistent ROA → strong asset efficiency  
-- **McDonald's** has the highest profit margin → strong pricing power  
-- **RBI** remains structurally weaker in profitability  
+### Profitability: Efficiency vs Pricing Power
 
-### Growth
+The three firms exhibit fundamentally different profitability structures.
 
-- **RBI** has the highest revenue growth → expansion-driven strategy  
-- **McDonald's** shows volatile growth but strong earnings → profitability-driven model  
-- **Yum Brands** demonstrates stable and balanced growth  
+- **Yum Brands** consistently achieves the highest ROA, indicating superior asset efficiency and a business model that converts resources into returns more effectively.
+- **McDonald's** maintains the highest profit margin, suggesting strong pricing power and brand strength, but its lower ROA implies less efficient asset utilization.
+- **RBI** lags behind in both metrics, pointing to a structurally weaker profitability base rather than temporary fluctuations.
 
-### Risk (Leverage)
+**Investment Insight:**  
+High margins do not necessarily mean high efficiency. Investors should distinguish between firms that generate profits through **pricing power** versus those that rely on **efficient operations**.
 
-- **Yum Brands** has the highest and most volatile leverage → higher financial risk  
-- **McDonald's** maintains moderate leverage supported by strong profits  
-- **RBI** has the lowest leverage but weaker performance  
+
+### Growth: Expansion vs Quality
+
+Revenue growth patterns differ significantly across firms.
+
+- **RBI** shows the strongest growth, especially post-2021, indicating aggressive expansion. However, this growth is not matched by improvements in profitability, suggesting **low-quality growth**.
+- **McDonald's** exhibits volatile growth but consistently strong earnings, indicating a **profitability-driven model**.
+- **Yum Brands** demonstrates moderate but stable growth, supported by strong operational efficiency.
+
+**Investment Insight:**  
+Growth alone is not sufficient. High growth without profitability may indicate expansion at the expense of efficiency.
+
+
+### Risk: Leverage and Financial Structure
+
+The firms also differ in their financial risk profiles.
+
+- **Yum Brands** carries the highest and most volatile leverage, implying greater dependence on debt financing.
+- **McDonald's** maintains moderate leverage, supported by strong and stable earnings.
+- **RBI** has the lowest leverage, but also weaker returns.
+
+**Investment Insight:**  
+Leverage should be interpreted alongside profitability. High debt can amplify returns, but also increases vulnerability if earnings weaken.
+
+
+### Overall Comparison: No Dominant Winner
+
+Each company excels in different dimensions:
+
+- **Yum Brands** → strongest efficiency, but higher financial risk  
+- **McDonald's** → most balanced profile, combining profitability and manageable leverage  
+- **RBI** → strongest growth, but weakest efficiency  
+
+**Final Insight for Beginner Investors:**  
+No single ratio can determine investment attractiveness.  
+A meaningful comparison requires combining profitability, growth, and risk to understand whether performance is driven by operational strength or financial structure.
+
 
 ### Key Investment Takeaway
 
