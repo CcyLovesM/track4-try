@@ -211,7 +211,8 @@ All analysis is based on annual data from **2019 to 2024** and is organized arou
     st.markdown(
         """
 The dataset comes from **Compustat via WRDS** and includes three global fast-food companies:
-**McDonald's**, **Yum Brands**, and **Restaurant Brands International**.
+**McDonald's**, **Yum! Brands (KFC, Pizza Hut, Taco Bell...)**, and
+**Restaurant Brands International (Burger King, Tim Hortons, Popeyes...)**.
 
 The raw variables used in the notebook are:
 `Net Income (ni)`, `Total Assets (at)`, `Shareholders' Equity (ceq)`,
