@@ -134,3 +134,10 @@ The app is designed to make financial analysis **interactive and beginner-friend
 Streamlit app: [Open the app](https://track4-try-czb8yezn3kf3w7ybqkdap2.streamlit.app) 
 
 Demo: Demo video: [Watch the demo video](Demo-video.mov) Download and watch it on the file page
+
+
+## 7. Limitations & Next Steps
+
+This project uses only a small set of financial ratios, so it cannot fully capture overall investment attractiveness. Factors such as cash flow, valuation, dividend policy, and broader market conditions are not included. In addition, financial statements may sometimes be influenced by accounting choices or earnings management, which means the results should be interpreted carefully.
+
+In future work, the analysis could be improved by adding more measures such as cash flow ratios, valuation ratios, and DuPont analysis. The dashboard could also be extended to include more companies, longer time periods, and more interactive features to support beginner investors more effectively.
