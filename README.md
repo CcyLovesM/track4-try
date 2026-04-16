@@ -59,7 +59,7 @@ The app uses multiple chart types to improve interpretation:
 ## 4. Key Insights
 
 
-### Profitability: Efficiency vs Pricing Power
+### I. Profitability: Efficiency vs Pricing Power
 
 The three firms exhibit fundamentally different profitability structures.
 
@@ -71,7 +71,7 @@ The three firms exhibit fundamentally different profitability structures.
 High margins do not necessarily mean high efficiency. Investors should distinguish between firms that generate profits through **pricing power** versus those that rely on **efficient operations**.
 
 
-### Growth: Expansion vs Quality
+### II. Growth: Expansion vs Quality
 
 Revenue growth patterns differ significantly across firms.
 
@@ -83,7 +83,7 @@ Revenue growth patterns differ significantly across firms.
 Growth alone is not sufficient. High growth without profitability may indicate expansion at the expense of efficiency.
 
 
-### Risk: Leverage and Financial Structure
+### III. Risk: Leverage and Financial Structure
 
 The firms also differ in their financial risk profiles.
 
@@ -95,7 +95,7 @@ The firms also differ in their financial risk profiles.
 Leverage should be interpreted alongside profitability. High debt can amplify returns, but also increases vulnerability if earnings weaken.
 
 
-### Overall Comparison: No Dominant Winner
+### IV. Overall Comparison
 
 Each company excels in different dimensions:
 
@@ -104,17 +104,15 @@ Each company excels in different dimensions:
 - **RBI** → strongest growth, but weakest efficiency  
 
 **Final Insight for Beginner Investors:**  
-No single ratio can determine investment attractiveness.  
-A meaningful comparison requires combining profitability, growth, and risk to understand whether performance is driven by operational strength or financial structure.
+- No single ratio can determine investment attractiveness.  
+- A meaningful comparison requires combining profitability, growth, and risk to understand whether performance is driven by operational strength or financial structure.
 
 
-### Key Investment Takeaway
+### V. Key Investment Takeaway
 
 - Strong growth does not guarantee profitability  
 - High profitability can offset growth volatility  
 - Leverage adds hidden risk  
-
-**Beginner investors should always combine multiple ratios rather than rely on a single metric.**
 
 
 ## 5. Interactive App
