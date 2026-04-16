@@ -131,4 +131,5 @@ This project includes a **Streamlit dashboard** that allows users to:
 The app is designed to make financial analysis **interactive and beginner-friendly**.
 
 ## 6. Product link / Demo
-Streamlit app: [Open the app](https://track4-try-czb8yezn3kf3w7ybqkdap2.streamlit.app)
+Streamlit app: [Open the app](https://track4-try-czb8yezn3kf3w7ybqkdap2.streamlit.app) （https://track4-try-czb8yezn3kf3w7ybqkdap2.streamlit.app）
+Demo: Demo video: [Watch the demo video](Demo-video.mov) Download and watch it on the file page
