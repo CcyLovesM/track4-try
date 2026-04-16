@@ -18,9 +18,11 @@ COMPANY_COLORS = {
 METRIC_LABELS = {
     "ROA": "ROA",
     "ROE": "ROE",
+    "Net Income": "Net Income",
     "Profit Margin": "Profit Margin",
     "Revenue Growth": "Revenue Growth",
     "Leverage": "Leverage",
+    "Conclusion": "Conclusion",
 }
 
 PERCENT_METRICS = {"ROA", "ROE", "Profit Margin", "Revenue Growth"}
@@ -163,6 +165,10 @@ def build_snapshot(data: pd.DataFrame) -> pd.DataFrame:
 df = load_data()
 
 st.sidebar.header("Controls")
+selected_view = st.sidebar.selectbox(
+    "Select metric / section",
+    options=["ROA", "Profit Margin", "ROE", "Net Income", "Revenue Growth", "Leverage", "Conclusion"],
+)
 selected_companies = st.sidebar.multiselect(
     "Select companies",
     options=df["company"].unique().tolist(),
@@ -176,7 +182,7 @@ selected_years = st.sidebar.slider(
 )
 summary_metrics = st.sidebar.multiselect(
     "Select metrics for the summary table",
-    options=list(METRIC_LABELS.keys()),
+    options=["ROA", "ROE", "Profit Margin", "Revenue Growth", "Leverage"],
     default=["ROA", "Profit Margin", "Revenue Growth", "Leverage"],
 )
 show_dataset = st.sidebar.checkbox("Show processed dataset", value=False)
@@ -245,23 +251,24 @@ st.dataframe(summary_table, use_container_width=True)
 st.subheader("Latest Company Snapshot")
 st.dataframe(snapshot_table, use_container_width=True)
 
-st.markdown("---")
-st.header("Step 1. Profitability Analysis: ROA and Profit Margin")
-st.markdown(
-    """
+if selected_view in {"ROA", "Profit Margin"}:
+    st.markdown("---")
+    st.header("Step 1. Profitability Analysis: ROA and Profit Margin")
+    st.markdown(
+        """
 This section compares **ROA** and **Profit Margin** to show how the three firms differ in
 profitability and operating efficiency.
 """
-)
+    )
 
-profit_col1, profit_col2 = st.columns(2)
-with profit_col1:
-    st.pyplot(draw_line_chart(filtered_df, "ROA", "ROA Over Time", "ROA"))
-with profit_col2:
-    st.pyplot(draw_line_chart(filtered_df, "Profit Margin", "Profit Margin Over Time", "Profit Margin"))
+    profit_col1, profit_col2 = st.columns(2)
+    with profit_col1:
+        st.pyplot(draw_line_chart(filtered_df, "ROA", "ROA Over Time", "ROA"))
+    with profit_col2:
+        st.pyplot(draw_line_chart(filtered_df, "Profit Margin", "Profit Margin Over Time", "Profit Margin"))
 
-st.markdown(
-    """
+    st.markdown(
+        """
 **Structural Differences in Performance**
 
 - **Yum Brands** consistently operates at a higher level across both ROA and Profit Margin, suggesting a structurally stronger and more mature business model.
@@ -279,33 +286,34 @@ st.markdown(
 - **Yum Brands** then shows a sharp rebound in 2021, suggesting resilience and a mean-reversion pattern.
 - **McDonald's** also recovers strongly, while **RBI** remains at a lower level, which suggests weaker internal resilience.
 """
-)
+    )
 
-st.markdown("---")
-st.header("Step 2. ROE in Context: ROE and Net Income")
-st.markdown(
-    """
+elif selected_view in {"ROE", "Net Income"}:
+    st.markdown("---")
+    st.header("Step 2. ROE in Context: ROE and Net Income")
+    st.markdown(
+        """
 Return on Equity (ROE) gives a quick view of returns generated from shareholders' capital.
 However, to interpret ROE properly, it needs to be read together with **Net Income**.
 That is especially important when equity is unusual or negative.
 """
-)
+    )
 
-roe_col1, roe_col2 = st.columns(2)
-with roe_col1:
-    st.pyplot(draw_line_chart(filtered_df, "ROE", "Return on Equity (ROE) Over Time", "ROE"))
-with roe_col2:
-    st.pyplot(draw_line_chart(filtered_df, "ni", "Net Income Over Time", "Net Income ($m)"))
+    roe_col1, roe_col2 = st.columns(2)
+    with roe_col1:
+        st.pyplot(draw_line_chart(filtered_df, "ROE", "Return on Equity (ROE) Over Time", "ROE"))
+    with roe_col2:
+        st.pyplot(draw_line_chart(filtered_df, "ni", "Net Income Over Time", "Net Income ($m)"))
 
-st.warning(
-    """
+    st.warning(
+        """
 McDonald's and Yum Brands show negative ROE in several years because their equity is negative.
 That does **not** mean these firms are unprofitable. In the notebook data, both companies still report positive net income.
 """
-)
+    )
 
-st.markdown(
-    """
+    st.markdown(
+        """
 **Why Are Some ROE Values Negative?**
 
 The negative ROE observed for **McDonald's** and **Yum Brands** is **not driven by poor profitability**.
@@ -329,26 +337,27 @@ All three firms are profitable, but their financial structures differ sharply.
 McDonald's and Yum Brands generate strong earnings, yet their capital structure can distort ROE and increase financial risk.
 RBI has a more interpretable ROE profile, but that does not automatically make it the strongest investment.
 """
-)
+    )
 
-st.markdown("---")
-st.header("Step 3. Growth Analysis: Revenue Growth")
-st.markdown(
-    """
+elif selected_view == "Revenue Growth":
+    st.markdown("---")
+    st.header("Step 3. Growth Analysis: Revenue Growth")
+    st.markdown(
+        """
 Revenue growth measures how quickly sales expand over time and helps investors judge a firm's
 expansion potential. But growth is most meaningful when it is read together with profitability and efficiency.
 """
-)
+    )
 
-st.pyplot(draw_line_chart(filtered_df, "Revenue Growth", "Revenue Growth Comparison", "Revenue Growth"))
+    st.pyplot(draw_line_chart(filtered_df, "Revenue Growth", "Revenue Growth Comparison", "Revenue Growth"))
 
-growth_tab1, growth_tab2, growth_tab3 = st.tabs(
-    ["RBI: Growth Story", "McDonald's: Profitability Story", "Yum: Balanced Story"]
-)
+    growth_tab1, growth_tab2, growth_tab3 = st.tabs(
+        ["RBI: Growth Story", "McDonald's: Profitability Story", "Yum: Balanced Story"]
+    )
 
-with growth_tab1:
-    st.markdown(
-        """
+    with growth_tab1:
+        st.markdown(
+            """
 ### RBI: Growth Driven by Expansion, Not Efficiency
 
 RBI maintains positive growth from 2021 to 2024 and reaches close to 20% in 2024.
@@ -363,11 +372,11 @@ However, when this is compared with **ROA**, **profit margin**, and **net income
 This suggests that RBI is expanding revenue, but it is less effective at converting that growth into profit and asset returns.
 Its growth therefore looks more like **scale expansion** than **high-quality efficient growth**.
 """
-    )
+        )
 
-with growth_tab2:
-    st.markdown(
-        """
+    with growth_tab2:
+        st.markdown(
+            """
 ### McDonald's: Volatile Growth with Strong Profitability
 
 McDonald's shows the most volatile revenue-growth pattern.
@@ -382,11 +391,11 @@ But the earlier charts show a different story:
 This means McDonald's does not depend on smooth growth to produce strong performance.
 Its investment profile is **profitability-driven**: strong earnings can offset growth volatility.
 """
-    )
+        )
 
-with growth_tab3:
-    st.markdown(
-        """
+    with growth_tab3:
+        st.markdown(
+            """
 ### Yum Brands: Balanced and Sustainable Growth
 
 Yum Brands shows moderate growth without extreme swings.
@@ -400,22 +409,23 @@ This suggests Yum is not simply chasing aggressive expansion.
 Instead, it combines growth, efficiency, and profitability in a more sustainable pattern.
 For beginner investors, this can look more predictable than a pure growth story.
 """
-    )
+        )
 
-st.markdown(
-    """
+    st.markdown(
+        """
 **Main Takeaway from Revenue Growth**
 
 Revenue growth should not be interpreted mechanically. A high growth rate can be attractive,
 but it does not guarantee strong investment quality unless the company can also turn that growth
 into strong margins, efficient asset use, and reliable earnings.
 """
-)
+    )
 
-st.markdown("---")
-st.header("Step 4. Risk Analysis: Leverage")
-st.markdown(
-    """
+elif selected_view == "Leverage":
+    st.markdown("---")
+    st.header("Step 4. Risk Analysis: Leverage")
+    st.markdown(
+        """
 Leverage captures the financial-risk side of the dashboard.
 In this project, the analysis focuses on both:
 
@@ -424,30 +434,30 @@ In this project, the analysis focuses on both:
 
 This is where the notebook moves beyond line charts and uses a **grouped bar chart** and a **box plot**.
 """
-)
-
-risk_col1, risk_col2 = st.columns(2)
-with risk_col1:
-    st.pyplot(
-        draw_grouped_bar_chart(
-            filtered_df,
-            "Leverage",
-            "Leverage Ratio by Company and Year",
-            "Leverage (Long-Term Debt / Total Assets)",
-        )
-    )
-with risk_col2:
-    st.pyplot(
-        draw_box_plot(
-            filtered_df,
-            "Leverage",
-            "Distribution of Leverage by Company",
-            "Leverage (Long-Term Debt / Total Assets)",
-        )
     )
 
-st.markdown(
-    """
+    risk_col1, risk_col2 = st.columns(2)
+    with risk_col1:
+        st.pyplot(
+            draw_grouped_bar_chart(
+                filtered_df,
+                "Leverage",
+                "Leverage Ratio by Company and Year",
+                "Leverage (Long-Term Debt / Total Assets)",
+            )
+        )
+    with risk_col2:
+        st.pyplot(
+            draw_box_plot(
+                filtered_df,
+                "Leverage",
+                "Distribution of Leverage by Company",
+                "Leverage (Long-Term Debt / Total Assets)",
+            )
+        )
+
+    st.markdown(
+        """
 The **grouped bar chart** shows the level and trend of leverage over time.
 The **box plot** shows volatility and distribution:
 
@@ -455,10 +465,10 @@ The **box plot** shows volatility and distribution:
 - the height of the box indicates stability versus fluctuation,
 - and the whiskers capture more extreme values.
 """
-)
+    )
 
-st.markdown(
-    """
+    st.markdown(
+        """
 **Basic Interpretation**
 
 Higher leverage generally implies greater financial risk because a larger share of the firm's capital structure depends on debt.
@@ -488,10 +498,10 @@ RBI has the lowest leverage, which lowers balance-sheet risk.
 But low leverage does not automatically mean the best investment.
 Its weaker profitability and lower returns show that conservative financing alone does not guarantee attractiveness.
 """
-)
+    )
 
-st.markdown(
-    """
+    st.markdown(
+        """
 **What Does Leverage Volatility Indicate?**
 
 Leverage volatility helps investors read more than just the average debt level.
@@ -515,12 +525,13 @@ When combined with the earlier profitability and growth charts, the leverage ana
 
 For beginner investors, the key lesson is that leverage becomes meaningful only when it is interpreted together with growth and profitability.
 """
-)
+    )
 
-st.markdown("---")
-st.header("Conclusion")
-st.markdown(
-    """
+elif selected_view == "Conclusion":
+    st.markdown("---")
+    st.header("Conclusion")
+    st.markdown(
+        """
 All three companies show very different financial profiles when profitability, growth, and risk are considered together.
 
 - **Yum Brands** demonstrates strong profitability and efficiency, but its leverage is both higher and more variable, which adds financial risk beneath otherwise stable operating performance.
@@ -531,7 +542,7 @@ Overall, **no single company dominates in every category**.
 The broader lesson for beginner investors is that **one ratio is never enough**.
 The best comparison comes from combining a small set of metrics and asking whether a company's performance is supported by genuine operating strength or by a riskier financial structure.
 """
-)
+    )
 
 if show_dataset:
     st.markdown("---")
