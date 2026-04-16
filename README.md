@@ -99,9 +99,3 @@ This project includes a **Streamlit dashboard** that allows users to:
 - View a latest-year snapshot table  
 
 The app is designed to make financial analysis **interactive and beginner-friendly**.
-
-
-## How to Run
-
-```bash
-streamlit run app.py
